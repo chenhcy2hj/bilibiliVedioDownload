@@ -1,0 +1,13 @@
+# Cookie and secrets
+bilibiliCookie.txt
+bilibiliCookie_netscape.txt
+sudoPsw.txt
+
+# Python virtual environment
+venv/
+
+# Downloaded audio files
+output/
+
+# Claude Code
+.claude/
