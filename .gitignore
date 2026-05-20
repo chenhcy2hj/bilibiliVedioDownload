@@ -6,8 +6,5 @@ sudoPsw.txt
 # Python virtual environment
 venv/
 
-# Downloaded audio files
-output/
-
 # Claude Code
 .claude/
