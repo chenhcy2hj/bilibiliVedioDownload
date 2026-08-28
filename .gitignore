@@ -3,8 +3,34 @@ bilibiliCookie.txt
 bilibiliCookie_netscape.txt
 sudoPsw.txt
 
-# Python virtual environment
+# Python
 venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Node / frontend
+node_modules/
+dist/
+.npm-cache/
+
+# Python 打包中间产物（PyInstaller）
+build/
+
+# packaging 目录的临时 npm 产物与构建期二进制（CI/本机构建时重新获取）
+packaging/node_modules/
+packaging/package.json
+packaging/package-lock.json
+packaging/ffmpeg-macos-arm64/ffmpeg
+packaging/ffmpeg-windows-x64/ffmpeg.exe
+
+# 应用数据（开发模式运行产物，打包版在平台用户目录）
+data/
+output/
+
+# macOS
+.DS_Store
 
 # Claude Code
 .claude/

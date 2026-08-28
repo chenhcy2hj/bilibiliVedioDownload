@@ -1,0 +1,56 @@
+name: Build Windows x64
+
+# 手动触发或推送 v* 标签时构建 Windows 独立产物
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 构建前端产物
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: 安装 Python 依赖
+        run: pip install -r requirements.txt pyinstaller pywebview
+
+      - name: 获取静态 FFmpeg (win x64，npm 包内置二进制)
+        shell: bash
+        run: |
+          mkdir -p packaging/ffmpeg-windows-x64
+          cd packaging
+          npm init -y >/dev/null 2>&1
+          npm install @ffmpeg-installer/win32-x64
+          cp node_modules/@ffmpeg-installer/win32-x64/ffmpeg.exe ffmpeg-windows-x64/ffmpeg.exe
+          rm -rf node_modules package.json package-lock.json
+
+      - name: PyInstaller 打包
+        run: pyinstaller packaging/bilidownloader.spec --noconfirm
+
+      - name: 生成 zip 产物
+        shell: bash
+        run: |
+          cd dist
+          powershell -Command "Compress-Archive -Path BiliDownloader -DestinationPath BiliDownloader-Windows-x64.zip -Force"
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: BiliDownloader-Windows-x64
+          path: dist/BiliDownloader-Windows-x64.zip
+          retention-days: 14
