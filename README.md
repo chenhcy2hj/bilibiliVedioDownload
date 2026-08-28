@@ -64,14 +64,14 @@ npm run dev
 
 ## 桌面版（macOS / Windows 打包）
 
-构建产物位于 `dist/`：
+**双平台全部由 GitHub Actions 远端构建并自动发布**（无需本地打包）：
 
-- macOS（arm64，本机构建）：
-  ```bash
-  ./venv/bin/pyinstaller packaging/bilidownloader.spec --noconfirm
-  cd dist && zip -ryq BiliDownloader-macOS-arm64.zip BiliDownloader.app
-  ```
-- Windows（x64，GitHub Actions）：推送 `v*` 标签触发 `.github/workflows/build-windows.yml`，产物在 Actions 工件中下载。
+```bash
+git tag -a v0.1.1 -m "release"
+git push origin v0.1.1
+```
+
+推送 `v*` 标签后自动完成：macOS arm64（macos-15 runner）+ Windows x64 并行构建 → 自动创建/更新 GitHub Release 并上传两个 zip。Release 地址：`https://github.com/chenhcy2hj/bilibiliVedioDownload/releases`。
 
 **使用要点：**
 - 双击 `BiliDownloader.app` 启动（未签名应用首次需右键 → 打开）；
