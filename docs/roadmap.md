@@ -62,11 +62,11 @@
 
 **验收**：⏳ 远端构建产物内含有头 Chromium；打包版点"获取 Cookie"弹窗登录自动捕获；guide 返回无感文案（单测已过，真机待 P6）。
 
-### P6 · 发布与回归 🔵
+### P6 · 发布与回归 🔵（仅剩真机验收）
 - [x] 全量回归：存量 83 测试 + 新增用例全绿（96 passed）；ruff 通过
-- [ ] 推送 `v0.1.1` 标签 → 双平台自动构建 + 自动发布（Release 资产含 Chromium）
-- [x] 更新 `docs/project-status.md`（v0.1.1 移交"已完成/待发布"）
-- [ ] 真实设备验收（mac：右键打开 → 无感 Cookie → 下载；Windows：虚拟/实体机同流程）
+- [x] 推送 `v0.1.1` 标签 → 双平台自动构建 + 自动发布（Release 资产含 Chromium：mac zip 248MB / win zip 276MB）
+- [x] 更新 `docs/project-status.md`（v0.1.1 移交"已完成/待验收"）
+- [ ] 真实设备验收（mac：右键打开 → 无感 Cookie → 下载；Windows：虚拟/实体机同流程）→ 回填 `manual-test-plan.md`
 
 **验收**：Release v0.1.1 双平台资产就绪；`manual-test-plan.md` §4/§5 在新产物上通过。
 

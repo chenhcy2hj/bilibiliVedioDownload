@@ -1,11 +1,11 @@
-# 项目状态总览（v0.1.0 / v0.1.1 待发布）
+# 项目状态总览（v0.1.0 / v0.1.1 已发布待验收）
 
-> 更新日期：2026-08-28（v0.1.1 代码完成、待发 tag；P1–P5 详见 `docs/roadmap.md` §1）。
+> 更新日期：2026-09-05（v0.1.1 双平台 Release 已发布；P1–P5 详见 `docs/roadmap.md` §1）。
 > 详细设计见 `design-analysis.md`，开发规范见 `development-guide.md`，测试方案见 `manual-test-plan.md`。
 
 ---
 
-## 〇、v0.1.1 交付（P1–P5 已完成，P6 发布中）
+## 〇、v0.1.1 交付（P1–P5 已完成，P6 发布完成/真机验收待执行）
 
 | 项 | 状态 | 说明 |
 |----|------|------|
@@ -14,7 +14,7 @@
 | P3 任务历史持久化 | ✅ | `data/tasks.json`（原子写 + 锁 + 500 裁剪）；状态机驱动写盘（进度不写）；启动恢复：终态进历史、进行中 → `interrupted`（灰徽标）；`finished_at` 透传 |
 | P4 历史重试 | ✅ | 历史行（failed/interrupted/canceled）一键重试（复用 POST /api/tasks）；done 行"下载"链接 |
 | P5 Chromium 捆绑 | ✅ | workflow 安装 + spec 捆绑（排除 headless shell）+ launcher 注入 `PLAYWRIGHT_BROWSERS_PATH`；guide 打包版文案回正（无感获取 + 粘贴兜底） |
-| P6 发布回归 | 🔵 | 代码回归全绿（96 passed + ruff + 前端 build）；推送 v0.1.1 tag → 远端构建发布 → 真机验收 待执行 |
+| P6 发布回归 | 🔵 | 代码回归全绿（96 passed + ruff + 前端 build）；**v0.1.1 Release 已发布**（mac 248MB / win 276MB，含 Chromium）；真机验收待执行 |
 
 ---
 
