@@ -20,4 +20,4 @@ def test_root():
 def test_health():
     r = client.get("/api/health")
     assert r.status_code == 200
-    assert r.json()["version"] == "0.1.0"
+    assert r.json()["version"] == "0.1.1"

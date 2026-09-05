@@ -53,7 +53,7 @@ cd backend && ../venv/bin/uvicorn app.main:app --port 8000
 | SF02 | 右上角连接状态 | 数秒内显示 `open`（绿色） | |
 | SF03 | 页面 Cookie 条 | 显示"⚠️ 尚未配置 Cookie，请先获取" | |
 | SF04 | 设置面板 | 显示默认下载目录（末尾 `data/downloads`） | |
-| SF05 | curl `GET /api/health` | `{"app":"BiliDownloader","status":"ok","version":"0.1.0"}` | |
+| SF05 | curl `GET /api/health` | `{"app":"BiliDownloader","status":"ok","version":"0.1.1"}` | |
 | SF06 | 刷新页面 | 任务列表/设置/Cookie 状态保持（非 404） | |
 
 ## 2. URL 解析与任务创建（U）
