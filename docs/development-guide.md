@@ -53,9 +53,10 @@
 - 新增任务字段/状态时：同步 `persist.TaskRecord` 与 `HistoryStore._valid` 校验；恢复任务需可经 `to_response` 直出（避免依赖运行期 request）。
 
 **发布包捆绑规范（v0.1.1 P5，跨版本常态）**
-- 捆绑目标目录约定（`Packaging/bilidownloader.spec` datas 目标）：`_browsers/`（Playwright Chromium，只捆有头版 `chromium-<数字>*`）、`ffmpeg/`、`frontend/dist`；
-- 运行时定位：res === 打包模式 → 由 `launcher.py` 在 import app.main 之前通过环境变量/常量注入（如 `PLAYWRIGHT_BROWSERS_PATH=_MEIPASS/_browsers`）；开发模式走系统级缓存/路径；
-- 新增捆绑资源四件套：workflow 安装步骤 + spec datas + 运行时注入 + 缺失时的明确兜底错误（`BrowserUnavailable` 类，禁止静默崩溃）。
+- 捆绑目标目录约定：`_browsers/`（Playwright 有头 Chromium `chromium-<数字>*`）、`ffmpeg/`、`frontend/dist`；
+- **Chromium 不进 PyInstaller**（macOS 会重签 Chrome.app 嵌套 Framework 失败）：由 release.yml 打包完成后直拷 ms-playwright 缓存 → macOS `dist/BiliDownloader.app/Contents/Frameworks/_browsers`、Windows `dist/BiliDownloader/_internal/_browsers`（保留原始签名）；
+- 运行时定位：打包模式 → `launcher.py` 在 import app.main 之前 `setdefault PLAYWRIGHT_BROWSERS_PATH=_MEIPASS/_browsers`；开发模式走系统级缓存；
+- 新增捆绑资源四件套：workflow 安装步骤 + 打包/拷贝步骤 + 运行时注入 + 缺失时的明确兜底错误（`BrowserUnavailable` 类，禁止静默崩溃）。
 
 **前端（Vue3 + three.js）**
 - Composition API（`<script setup>`）；

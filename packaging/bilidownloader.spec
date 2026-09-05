@@ -2,12 +2,14 @@
 """PyInstaller spec：BiliDownloader 桌面应用。
 
 - onedir 模式（COLLECT）；macOS 额外生成 .app（BUNDLE，zip 直解压运行）
-- 资源捆绑：frontend/dist（前端产物）、ffmpeg 静态二进制（对应平台/架构）、
-  Playwright 有头 Chromium（P5：打包版恢复无感获取 Cookie）
+- 资源捆绑：frontend/dist（前端产物）、ffmpeg 静态二进制（对应平台/架构）
+- Chromium 不在本 spec 捆绑（P5 实施修正 2026-09-05）：macOS 上 PyInstaller 对
+  收集二进制执行 ad-hoc 签名会失败（Chrome.app 含嵌套 Framework 无法重签）；
+  改由 release.yml 打包完成后直接拷贝 ms-playwright 缓存目录进产物
+  （macOS Contents/Frameworks/_browsers；Windows _internal/_browsers），
+  保留 Google 原始签名，运行时通过 PLAYWRIGHT_BROWSERS_PATH 定位。
 - 构建产物：dist/BiliDownloader/（Windows），dist/BiliDownloader.app（macOS）
 """
-import glob
-import os
 import sys
 from pathlib import Path
 
@@ -24,22 +26,6 @@ datas = [
     (str(FRONTEND_DIST), "frontend/dist"),
     (str(FFMPEG_DIR), "ffmpeg"),
 ]
-
-# Playwright Chromium 缓存路径（构建前由 release.yml 执行 playwright install chromium）
-# 只捆有头 Chromium（chromium-<数字>*），排除 headless shell 省 ~100MB
-if sys.platform == "darwin":
-    PW_CACHE = Path.home() / "Library" / "Caches" / "ms-playwright"
-else:
-    PW_CACHE = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "ms-playwright"
-
-_browser_dirs = sorted(glob.glob(str(PW_CACHE / "chromium-[0-9]*")))
-if not _browser_dirs:
-    raise SystemExit(
-        "未找到 Playwright Chromium 缓存，请先运行: python -m playwright install chromium"
-    )
-for _d in _browser_dirs:
-    # 目标 _browsers：onedir 位于 _MEIPASS/_browsers（macOS 为 Contents/Frameworks/_browsers）
-    datas.append((_d, f"_browsers/{Path(_d).name}"))
 
 # uvicorn 动态导入的模块需显式收集
 hiddenimports = [

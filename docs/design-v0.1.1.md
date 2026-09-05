@@ -154,12 +154,10 @@ python -m playwright install chromium
 
 ### spec 捆绑（`packaging/bilidownloader.spec`）
 - `excludes` 移除 `playwright`（需要打包其 Python 库）；
-- datas 增加（按平台取缓存路径，glob `chromium-<数字>*`，排除 headless shell 节省 ~100MB）：
-  ```python
-  _browsers = glob.glob(str(PW_CACHE / "chromium-[0-9]*"))
-  datas += [(d, f"_browsers/{Path(d).name}") for d in _browsers]
-  ```
-- 目标目录 `_browsers` → onedir 下位于 `Contents/Frameworks/_browsers`（macOS）/ 可执行同目录（Windows），即 `sys._MEIPASS/_browsers`。
+- **（实施修正 2026-09-05）** 原方案 datas 捆绑 Chromium 在 macOS 构建失败：PyInstaller 会对收集的二进制做 ad-hoc 签名，而 `Google Chrome for Testing.app`（含嵌套 Framework）无法重新签名（`bundle format unrecognized` → SystemError）。**改为：spec 不捆绑 Chromium（datas 仅 frontend/ffmpeg），由 release.yml 在 PyInstaller 打包完成后、zip 前，将 ms-playwright 缓存中的 `chromium-[0-9]*` 目录直接拷贝进产物**（保留 Google 原始签名，arm64 可直接运行）：
+  - macOS：`dist/BiliDownloader.app/Contents/Frameworks/_browsers`（即 `_MEIPASS/_browsers`）
+  - Windows：`dist/BiliDownloader/_internal/_browsers`
+  - 目标目录 `_browsers` 与运行时定位不变。
 
 ### 运行时定位（`backend/app/launcher.py`）
 在 import app.main **之前**（模块级启动路径起点）：
@@ -217,7 +215,7 @@ if is_packaged():
 | `backend/app/launcher.py` | PLAYWRIGHT_BROWSERS_PATH 注入 |
 | `frontend/src/components/UrlForm.vue` | ≤10 提示与拦截 |
 | `frontend/src/components/TaskPanel.vue` | interrupted 徽标、重试按钮 |
-| `packaging/bilidownloader.spec` | 捆绑 chromium（移除 excludes） |
+| `packaging/bilidownloader.spec` | 移除 chromium 捆绑（playwright 库保留在包内） |
 | `.github/workflows/release.yml` | 增加 `playwright install chromium` |
 | `backend/tests/test_persist.py`（新增）、`test_api.py`、`test_acquire.py` | 新用例 |
 | `docs/project-status.md`、`docs/roadmap.md` | 状态流转 |

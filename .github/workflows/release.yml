@@ -66,6 +66,22 @@ jobs:
       - name: PyInstaller 打包
         run: pyinstaller packaging/bilidownloader.spec --noconfirm
 
+      - name: 附加有头 Chromium 到产物（P5）
+        # 不进 PyInstaller（macOS 会尝试重签 Chrome.app 嵌套 Framework 导致失败），
+        # 打包完成后直拷 ms-playwright 缓存（保留原始签名），即 sys._MEIPASS/_browsers
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            SRC="$HOME/Library/Caches/ms-playwright"
+            DEST="dist/BiliDownloader.app/Contents/Frameworks/_browsers"
+          else
+            SRC="$LOCALAPPDATA/ms-playwright"
+            DEST="dist/BiliDownloader/_internal/_browsers"
+          fi
+          mkdir -p "$DEST"
+          cp -R "$SRC"/chromium-[0-9]* "$DEST/"
+          du -sh "$DEST"/*
+
       - name: 生成 zip 产物
         shell: bash
         run: |

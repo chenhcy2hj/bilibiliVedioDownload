@@ -52,7 +52,7 @@ bilibiliVedioDownload/
 2. **批量上限（P2）**：单次提交 ≤10 条（`MAX_URLS_PER_BATCH`）；后端 422 `BATCH_TOO_LARGE`；前端超限禁用提交+行内提示（不阻塞粘贴）。
 2. **下载链路**：预探测标题（`extract_info(download=False)`，回传 Task.title 作"名称"）→ `unique_path` 重名加 `(1)` → 下载。**进度统一 `calc_progress()`**：字节比例优先、分片下载（total 缺失）用 `fragment_index/count` 兜底（修复过"进度不动"坑）。取消：hook 抛 `DownloadCancelled`。
 3. **任务管理**：状态机 `pending→parsing→downloading→converting→done|failed|canceled`；串行队列；WS 事件 `{type,payload}`（snapshot/created/progress/phase/done/failed/canceled），**进度节流 200ms**；错误分类 auth/network/convert/not_found/path。**P3 历史持久化**：终态写 `data/tasks.json`（原子写+锁+500 裁剪），状态切换驱动写盘（进度不写），启动恢复（进行中 → `interrupted` 灰徽标进历史），`finished_at` 透传；**P4 历史行 failed/interrupted/canceled 一键重试**（复用 POST /api/tasks，done 行下载链接）。
-4. **Cookie**：开发模式**无感获取**（Playwright 弹窗→登录→自动捕获，持久化 profile 复用登录态）；校验 `x/web-interface/nav`（code==0）；自动转 Netscape；下载前时效检查（失效→failed(auth)+前端联动）。**P5 打包版捆绑有头 Chromium**（spec datas → `_MEIPASS/_browsers`，launcher 注入 `PLAYWRIGHT_BROWSERS_PATH`，guide 文案回正为无感获取+粘贴兜底）；兜底：书签（仅固定端口开发模式）/手动粘贴。
+4. **Cookie**：开发模式**无感获取**（Playwright 弹窗→登录→自动捕获，持久化 profile 复用登录态）；校验 `x/web-interface/nav`（code==0）；自动转 Netscape；下载前时效检查（失效→failed(auth)+前端联动)。**P5 打包版捆绑有头 Chromium**（workflow 打包后直拷 `_browsers/` → launcher 注入 `PLAYWRIGHT_BROWSERS_PATH`；不进 PyInstaller——macOS 重签 Chrome.app 会失败；guide 文案回正为无感获取+粘贴兜底）；兜底：书签（仅固定端口开发模式）/手动粘贴。
 5. **设置**：输出目录可配置（绝对路径/自动创建/写探针，`data/settings.json`）；任务级格式 mp3/128-320k。
 6. **打包版安全**：动态端口（port 0）+ 随机 token（HTTP `X-Auth-Token`、WS `?token=`，**仅保护 /api/\***，静态入口放行）；启动失败弹窗退出，**无浏览器降级**；数据目录平台隔离。
 7. **发布全自动**：推 `v*` 标签 → 矩阵并行构建 → publish job（**`permissions: contents: write`**、`overwrite_files`）自动建/更新 Release + 上传 zip；`workflow_dispatch` 仅产 artifact。

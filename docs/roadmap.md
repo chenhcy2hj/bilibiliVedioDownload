@@ -54,7 +54,7 @@
 
 ### P5 · 打包版恢复无感获取 Cookie（捆绑 Chromium） ✅
 - [x] `release.yml` 矩阵构建：`pip install playwright` + `playwright install chromium`（每平台调取对应版本）
-- [x] `packaging/bilidownloader.spec`：datas 捆绑 chromium 目录（`chromium-<v>/`，mac arm64 / win x64 各自）；排除项移除对 playwright 的排除
+- [x] `packaging/bilidownloader.spec`：playwright 库随包（excludes 移除）；**Chromium 由 release.yml 打包后直拷产物 `_browsers/`**（实施修正：spec datas 方案在 macOS 上触发 PyInstaller 重签 Chrome.app 失败，2026-09-05）
 - [x] 运行时定位：launcher/main 设置 `PLAYWRIGHT_BROWSERS_PATH` 指向包内浏览器目录（`sys._MEIPASS/_browsers`）
 - [x] `api/cookie.py` guide：**移除"打包版仅支持手动粘贴"分支**，与开发模式一致（无感获取文案 + 书签/粘贴兜底）
 - [ ] 体积与构建时间确认：zip ~180-200MB、CI +1~2 分钟（P6 远端产物核验）
