@@ -9,7 +9,7 @@
 ## 1. 强制流程（新会话第一步即执行）
 
 1. **读取 `docs/PROJECT_SUMMARY.md`** —— 历史脉络、当前进度、工作约定、验收方式全在此；
-2. **接续当前任务**：按 §2「当前进度」的下一步执行；实施 v0.1.1 前**必读 `docs/design-v0.1.1.md`**（P2–P6 技术方案：数据结构/接口/流程/涉及文件）；
+2. **接续当前任务**：按 §2「当前进度」的下一步执行；涉及 v0.1.1 相关代码**必读 `docs/design-v0.1.1.md`**（P2–P6 技术方案 + 实施偏差记录）；开启新版本先读 `docs/roadmap.md` §2 候选与 `docs/design-analysis.md`；
 3. **定向补充**：按 §6 文档地图按需读取（设计细节→design-analysis；规划→roadmap；规范→development-guide；验收→manual-test-plan；状态→project-status）；
 4. **遵守约定**：实施按 PROJECT_SUMMARY §8（文档优先/门禁/提交格式/发布纪律/沙箱/不干扰用户环境）；
 5. **按验收交付**：每个改动经 §9 验收方式（pytest + ruff + build 全绿；发布走 tag 远端自动构建）。

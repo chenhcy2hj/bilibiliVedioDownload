@@ -55,9 +55,9 @@
 
 ### 1.3 质量与文档
 
-- 自动化测试 **96 passed**（parser 形态/registry、设置校验、Cookie 校验与获取、WS 事件流/节流、取消、进度计算、token 鉴权、M5 全部、P2 批量上限、P3 历史持久化、P4 重试、P5 打包版 guide 分支）；ruff 全绿
+- 自动化测试 **98 passed**（parser 形态/registry、设置校验、Cookie 校验与获取、WS 事件流/节流、取消、进度计算、token 鉴权、M5 全部、P2 批量上限、P3 历史持久化、P4 重试、P5 打包版 guide 分支、launcher stdio 修复）；ruff 全绿
 - 文档：`design-analysis.md`（设计）、`development-guide.md`（分阶段开发规范）、`manual-test-plan.md`（手动测试方案）、`README.md`（使用与发布说明）
-- 代码与 Release 全部推送远端（main @ 4c01550；Release v0.1.0 双平台资产）
+- 代码与 Release 全部推送远端（main @ f416c91 重写历史后；Release v0.1.0/v0.1.1 双平台资产）
 
 ---
 
@@ -65,12 +65,11 @@
 
 | # | 事项 | 影响 | 处理建议 |
 |---|------|------|----------|
-| 1 | **Windows 包未在真实 Windows 机器验收** | CI 构建成功 ≠ 功能验证（GUI/下载/WebView2） | 在 Win10/11 解压按 `manual-test-plan.md` §1/§5 冒烟 |
-| 2 | **未签名/未公证** | macOS 首次需"右键 → 打开"；正式分发需 Developer ID + notarization | 如对外分发再处理（需开发者证书） |
-| 3 | **WebView2 依赖**（Windows） | Win11/新版 Win10 自带；老系统需预装 | 发布说明中提示；如需静默安装再扩展 |
-| 4 | **多P 仅下载指定分P** | `?p=2` 只处理所选分P，不做"全部 P"批量 | 后续增加 playlist 能力 |
-| 5 | **无 CI 测试门禁** | workflow 只构建发布，未跑 pytest/ruff | 可在 workflow 加 test job 防回归 |
-| 6 | 下载并发恒定串行、无限速/代理/自定义 UA 配置 | 特网场景受限 | 设置面板扩展项 |
+| 1 | **未签名/未公证** | macOS 首次需"右键 → 打开"；正式分发需 Developer ID + notarization | 如对外分发再处理（需开发者证书） |
+| 2 | **WebView2 依赖**（Windows） | Win11/新版 Win10 自带；老系统需预装 | 发布说明中提示；如需静默安装再扩展 |
+| 3 | **多P 仅下载指定分P** | `?p=2` 只处理所选分P，不做"全部 P"批量 | 后续增加 playlist 能力 |
+| 4 | **无 CI 测试门禁** | workflow 只构建发布，未跑 pytest/ruff | 可在 workflow 加 test job 防回归 |
+| 5 | 下载并发恒定串行、无限速/代理/自定义 UA 配置 | 特网场景受限 | 设置面板扩展项 |
 
 ---
 
