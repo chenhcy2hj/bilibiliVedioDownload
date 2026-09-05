@@ -14,6 +14,7 @@ const STATUS_LABEL = {
   done: '完成',
   failed: '失败',
   canceled: '已取消',
+  interrupted: '中断',
 }
 
 // 失败原因 → 建议动作
@@ -56,12 +57,10 @@ async function cancel(t) {
 }
 
 // 响应式分组：任务列表随 store 更新实时渲染
-const active = computed(() =>
-  store.tasks.filter((t) => ['pending', 'parsing', 'downloading', 'converting'].includes(t.status)),
-)
-const history = computed(() =>
-  store.tasks.filter((t) => !['pending', 'parsing', 'downloading', 'converting'].includes(t.status)),
-)
+// 历史 = 全部终态（done/failed/canceled/interrupted）；active 之外的自动归入历史
+const ACTIVE_STATUSES = ['pending', 'parsing', 'downloading', 'converting']
+const active = computed(() => store.tasks.filter((t) => ACTIVE_STATUSES.includes(t.status)))
+const history = computed(() => store.tasks.filter((t) => !ACTIVE_STATUSES.includes(t.status)))
 </script>
 
 <template>
@@ -199,6 +198,10 @@ const history = computed(() =>
   background: #f1f5f9;
   color: #94a3b8;
 }
+.badge.interrupted {
+  background: #f1f5f9;
+  color: #64748b;
+}
 
 /* ---- 条形码动态进度条 ---- */
 .barline {
@@ -271,11 +274,12 @@ const history = computed(() =>
   );
   animation: none;
 }
-/* 失败/取消：红/灰条码 */
+/* 失败/取消/中断：红/灰条码 */
 .barcode .fill.failed {
   background: repeating-linear-gradient(90deg, #b91c1c 0px, #b91c1c 4px, #fca5a5 4px, #fca5a5 8px);
 }
-.barcode .fill.canceled {
+.barcode .fill.canceled,
+.barcode .fill.interrupted {
   background: repeating-linear-gradient(90deg, #94a3b8 0px, #94a3b8 4px, #cbd5e1 4px, #cbd5e1 8px);
 }
 

@@ -80,3 +80,7 @@ DEFAULT_AUDIO_QUALITY = "192"
 
 # 单次提交 URL 上限（v0.1.1 P2）
 MAX_URLS_PER_BATCH = 10
+
+# 任务历史持久化（v0.1.1 P3）：终态任务写盘；保留最近 N 条
+TASKS_FILE = DATA_DIR / "tasks.json"
+MAX_HISTORY = 500

@@ -13,6 +13,7 @@ class TaskStatus(str, Enum):
     DONE = "done"
     FAILED = "failed"
     CANCELED = "canceled"
+    INTERRUPTED = "interrupted"  # 进程重启时未完成任务，归入历史（P3）
 
 
 class TaskCreateRequest(BaseModel):
@@ -42,3 +43,4 @@ class TaskResponse(BaseModel):
     output_dir: str = ""
     file_path: str | None = None
     created_at: datetime
+    finished_at: datetime | None = None

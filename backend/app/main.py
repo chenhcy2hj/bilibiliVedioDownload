@@ -78,6 +78,8 @@ parser_registry = UrlParserRegistry()
 parser_registry.register(BilibiliParser())
 
 task_manager = TaskManager(settings=settings_service, cookie=cookie_service)
+# 启动恢复任务历史：终态进历史分组；上次未完成任务标记"中断"（P3）
+task_manager.load_history()
 
 # WebSocket 进度推送：TaskManager 事件 → EventPusher（节流）→ ConnectionManager 广播
 ws_manager = ws.ConnectionManager()
