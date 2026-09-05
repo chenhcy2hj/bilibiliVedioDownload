@@ -1,7 +1,7 @@
 # 手动测试方案（M1–M5 验收）
 
 > 用途：在本地亲手验证已实现功能（FastAPI 后端 + Vue3/three.js 前端）。
-> 测试对象：当前代码（M6 打包不在本方案范围）。
+> 测试对象：当前代码（M6 打包已交付，macOS/Windows 打包版同样适用；打包版专项见 §4 Cookie 无感获取与 §5 下载）。
 > 配套文档：`docs/design-analysis.md`（设计）、`docs/development-guide.md`（规范）。
 
 ---

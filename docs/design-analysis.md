@@ -129,7 +129,7 @@ TaskManager 串行执行（降反爬风险），每步产生事件经 WebSocket 
 
 | 方案 | 做法 | 优点 | 缺点 |
 |------|------|------|------|
-| **C. 浏览器自动捕获（已确认主路径）** | 后端 Playwright 弹出真实 Chromium 窗口（持久化登录态）→ 用户扫码/登录 → **自动捕获 Cookie、自动校验保存**，全程零复制粘贴 | 无感体验：点击"获取 Cookie"→ 登录 → 完成；二次获取复用登录态 | 依赖 Chromium（~95MB）；打包版需捆绑浏览器（M6 处理） |
+| **C. 浏览器自动捕获（已确认主路径）** | 后端 Playwright 弹出真实 Chromium 窗口（持久化登录态）→ 用户扫码/登录 → **自动捕获 Cookie、自动校验保存**，全程零复制粘贴 | 无感体验：点击"获取 Cookie"→ 登录 → 完成；二次获取复用登录态 | 依赖 Chromium（~360MB）；**v0.1.1 起捆绑进发布包**（roadmap P5），打包版恢复无感获取 |
 | B. 书签小工具（兜底保留） | 前端新窗口打开 bilibili.com；用户登录后点击应用提供的"收藏夹 JS（bookmarklet）"，脚本在 B 站页面内读取 `document.cookie` 并 POST 回传本地后端 | 不依赖额外浏览器体积 | 首次需手动创建书签；仅开发模式固定端口可用 |
 | A. 手动粘贴（兜底） | 跳转 B 站登录后 F12 复制 Cookie 粘贴回应用 | 零依赖、最稳 | 每次手动操作，繁琐 |
 
@@ -251,7 +251,8 @@ class SettingsService:
 | 7 | 输出规格 | **仅音频 MP3，默认 192k**（UI 预留码率选项） |
 | 8 | 部署 | **本地单机**（v1） |
 | 9 | 旧 CLI 兼容 | **抽公共核心，CLI 与 Web 共用下载服务** |
-| 10 | 桌面打包方案 | ✅ **D. pywebview 独立窗口**（系统 WebView 内嵌前端 + 同进程 FastAPI；macOS 用自带 WKWebView、Windows 依赖 WebView2）；**不设浏览器降级**，启动失败即报错退出；**macOS / Windows 分别构建独立产物** |
+| 10 | 桌面打包方案 | ✅ **D. pywebview 独立窗口**（系统 WebView 内嵌前端 + 同进程 FastAPI；macOS 用自带 WKWebView、Windows 依赖 WebView2）；**不设浏览器降级**，启动失败即报错退出；**双平台均由远端矩阵 workflow 构建**（推送 v* 标签即自动发布） |
+| 12 | 发布自动化 | ✅ 推送 `v*` 标签 → 双平台并行远端构建 → 自动创建/更新 Release + 上传 zip（`release.yml`，permissions: contents:write） |
 | 11 | 下载目录 | ✅ **可配置**：`SettingsService` + `GET/PUT /api/settings`；pywebview 用原生目录选择器、浏览器模式手动输入；持久化到 settings.json，新任务生效 |
 
 ---
@@ -290,12 +291,13 @@ class SettingsService:
 
 | 平台 | 构建位置 | 架构 | 捆绑内容 | 产物 |
 |------|----------|------|----------|------|
-| macOS | 本机（Apple M2）直接构建 | arm64（如需 Intel 兼容另出 x64 包） | arm64 ffmpeg + yt-dlp + pywebview（WKWebView 系统自带） | `BiliDownloader-macOS-arm64.zip`（内含 .app） |
+| macOS | 远端 macos-15 runner（GitHub Actions） | arm64 | arm64 ffmpeg + yt-dlp + pywebview（系统 WKWebView）+ Chromium（v0.1.1 起） | `BiliDownloader-macOS-arm64.zip`（内含 .app） |
 | Windows | GitHub Actions `windows-latest` 构建 | x64 | x64 ffmpeg + yt-dlp + pywebview（WebView2，Win11 / 新版 Win10 自带，老系统需预装） | `BiliDownloader-Windows-x64.zip`（内含 .exe） |
 
 **分发注意**
-- macOS Gatekeeper：本机自用未签名应用需"右键 → 打开"；正式分发需 Developer ID + 公证（notarization），**v1 不做**，zip 直解压运行；
-- yt-dlp 以 pip 依赖随 PyInstaller 打包，版本号随构建产物固化，升级 = 重新发版（两个平台分别发版）。
+- macOS Gatekeeper：未签名应用需"右键 → 打开"；正式分发需 Developer ID + 公证（notarization），**v1 不做**，zip 直解压运行；
+- yt-dlp 以 pip 依赖随 PyInstaller 打包，版本号随构建产物固化，升级 = 重新发版；
+- **发布全自动化**：推送 `v*` 标签 → `.github/workflows/release.yml` 矩阵构建（macOS arm64 + Windows x64）→ publish 自动创建/更新 GitHub Release 并上传双平台 zip。
 
 ### 5.4 对既有设计的影响
 
@@ -307,11 +309,12 @@ class SettingsService:
 
 ## 六、里程碑建议
 
-- **M1 准备**：装 ffmpeg、建 venv、安装依赖（半日）
-- **M2 后端核心**：UrlParser 接口 + Registry + BilibiliParser 实现 + TaskManager + REST + **Cookie 模块（校验/保存/转换接口）** + **SettingsService（下载目录配置接口）**（无前端，可 curl 验收）
-- **M3 进度流**：WebSocket 事件推送 + 转码钩子接入
-- **M4 前端**：Vue3+Vite 工程（纯白主题）+ 条形码进度条 + 任务面板 + 对接 API
-- **M5 打磨**：Cookie 获取引导页（一键跳转 + 书签/粘贴回传）、**设置面板（下载目录修改）**、批量输入、错误提示、取消任务、成品下载、README 更新
-- **M6 打包分发**：FFmpeg 捆绑 + 数据目录迁移 + **pywebview 启动入口（无浏览器降级）** + PyInstaller 双平台**独立构建**（macOS 本机出 arm64 包、Windows 走 CI 出 x64 包）+ 双平台产物验证
+- **M1 准备**：装 ffmpeg、建 venv、安装依赖（半日） ✅ 已完成（v0.1.0）
+- **M2 后端核心**：UrlParser 接口 + Registry + BilibiliParser 实现 + TaskManager + REST + **Cookie 模块（校验/保存/转换接口）** + **SettingsService（下载目录配置接口）**（无前端，可 curl 验收） ✅ 已完成 (v0.1.0)
+- **M3 进度流**：WebSocket 事件推送 + 转码钩子接入 ✅ 已完成（v0.1.0）
+- **M4 前端**：Vue3+Vite 工程（纯白主题）+ 条形码进度条 + 任务面板 + 对接 API ✅ 已完成（v0.1.0）
+- **M5 打磨**：Cookie 无感获取（Playwright）、设置面板（下载目录）、批量输入、错误提示、取消任务、成品下载、README 更新 ✅ 已完成（v0.1.0）
+- **M6 打包分发**：FFmpeg 捆绑 + 数据目录迁移 + **pywebview 启动入口（无浏览器降级）** + PyInstaller 双平台**远端矩阵构建** + tag 自动发布 ✅ 已完成（v0.1.0）
+- **v0.1.1**：LICENSE(MIT)+免责、批量≤10、tasks.json 历史持久化（500 裁剪/中断标记/重试）、Chromium 捆绑发布包恢复打包版无感获取 —— 详见 `docs/roadmap.md`
 
 > 风险提示：B站风控（412/封禁风险）——串行下载、控制频率、Cookie 失效即提示重取。

@@ -203,11 +203,11 @@
 ## M6 打包分发
 
 ### 任务清单
-1. **launcher.py**（应用入口）：启动 uvicorn（**端口 0 动态分配** → 生成随机 token 注入前端请求头）→ 拉起 pywebview 窗口（macOS WKWebView / Windows WebView2）；**启动失败直接报错退出并提示，不做浏览器降级**；
-2. **PyInstaller（macOS 本机构建）**：onedir 模式 spec（bundles：前端 dist、arm64 ffmpeg 静态二进制、yt-dlp 依赖）；产物 `BiliDownloader-macOS-arm64.zip`（内含 .app，zip 直解压运行，v1 不做签名/公证）；
-3. **GitHub Actions（Windows 构建）**：`windows-latest` runner 构建 x64 包（捆绑 x64 ffmpeg），产物 `BiliDownloader-Windows-x64.zip`（内含 .exe）；双平台 workflow 独立，同一仓库 tag 触发；
-4. 状态下发：打包版暴露 `GET /api/health`（版本号 + yt-dlp 版本），前端"关于"显示，便于排查与提示升级；
-5. 双平台产物验证：mac 本机完整验收 `.app`；Windows 产物在真实 Windows 环境人工验收（CI 无法代替 GUI 验证）。
+1. **launcher.py**（应用入口）：启动 uvicorn（**端口 0 动态分配** → 随机 token：HTTP `X-Auth-Token` + WS `?token=`，仅保护 `/api/*`）→ 拉起 pywebview 窗口（macOS WKWebView / Windows WebView2，js_api 暴露 `choose_dir`）；**启动失败系统弹窗报错退出，不做浏览器降级**；
+2. **PyInstaller 双平台远端构建**（`packaging/bilidownloader.spec`）：onedir + macOS `.app` BUNDLE；bundles：前端 dist、对应平台静态 ffmpeg（npm `@ffmpeg-installer/*` 渠道）、yt-dlp；**v0.1.1 起捆绑 Playwright Chromium**（`PLAYWRIGHT_BROWSERS_PATH` 指向包内目录），打包版恢复无感获取 Cookie；
+3. **构建与发布全自动化**（`.github/workflows/release.yml`）：矩阵双平台并行（macos-15 arm64 / windows-latest x64），推送 `v*` 标签触发；构建成功后 `publish` job（`permissions: contents: write`）自动创建/更新 Release 并上传双平台 zip（`overwrite_files` 支持重发）；`workflow_dispatch` 仅产 artifact 不发布；
+4. 状态下发：`GET /api/health`（版本号 + yt-dlp 版本），前端"关于"显示，便于排查与提示升级；
+5. 双平台产物验证：mac 本机完整验收 `.app`（动态端口、token 鉴权、静态入口放行、真实下载链路）；Windows 产物在真实 Windows 环境人工验收（CI 无法代替 GUI 验证）。
 
 ### 注意事项
 - PyInstaller **不支持交叉编译**：Windows 包必须在 Windows 构建（CI）；两个平台是**独立产物**，各自捆绑对应架构 ffmpeg；
@@ -216,7 +216,9 @@
 - yt-dlp 随包固化：升级 = 重新构建两个平台并分别发版；版本信息展示在"关于"页；
 - macOS 未签名应用首次打开需"右键 → 打开"（Gatekeeper），在交付说明中写明；
 - WebView2：Win11/新版 Win10 自带；老系统需在交付说明中提示预装（v1 不自动安装）；
-- CI 密钥保护：GitHub Actions 中不应出现 Cookie 等敏感内容（构建产物不含用户数据）。
+- CI 密钥保护：GitHub Actions 中不应出现 Cookie 等敏感内容（构建产物不含用户数据）；
+- **构建发布全流程走远端**（tag 触发矩阵构建 + 自动 Release），禁止本地出包与手工上传资产（facts：本地构建仅用于开发验证，如 PyInstaller 缓存/签名留待 CI）；
+- Chromium 捆绑（v0.1.1）：CI 侧 `playwright install chromium` 后经 spec datas 捆绑，运行时 `PLAYWRIGHT_BROWSERS_PATH` 指向包内目录；打包版无感获取恢复后，`guide` 接口不再做"打包版降级"分支。
 
 ### 验收标准
 - mac 包：双击 .app → 窗口出现 → 全流程（cookie 引导 → 下载 → 转码 → 成品）通过；
@@ -236,7 +238,7 @@
 | 版权/合规 | 内容受版权保护 | README 个人使用声明；仅个人学习；不传播不商用 |
 | 路径/权限 | 输出目录不可写、磁盘满 | SettingsService 校验先行；错误分类 path 并给出建议 |
 | 本机安全 | 本地服务被其他进程调用 | 打包版动态端口 + token；开发版仅绑 127.0.0.1 |
-| three.js 内存 | 长时间任务场景泄漏 | scenes 模块统一 dispose；M4 验收标准含内存检查 |
+| 历史列表膨胀 | tasks.json 持久化后历史增长 | 保留最近 500 条自动裁剪；列表渲染上限提示 |
 | 交叉编译限制 | Windows 产物无法在 mac 构建 | 一律走 CI；避免在本地跑 fake 的 win 包验证 |
 
 > 本指导文档与 design-analysis.md 同步维护：任何阶段的实现偏差，先更新两处文档再继续编码。

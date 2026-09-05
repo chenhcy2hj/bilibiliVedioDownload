@@ -1,6 +1,6 @@
 # 项目状态总览（v0.1.0）
 
-> 更新日期：2026-08-28（Release v0.1.0 发布后）。
+> 更新日期：2026-08-28（Release v0.1.0 发布后；v0.1.1 规划见 `docs/roadmap.md`）。
 > 详细设计见 `design-analysis.md`，开发规范见 `development-guide.md`，测试方案见 `manual-test-plan.md`。
 
 ---
@@ -44,7 +44,7 @@
 
 | # | 事项 | 影响 | 处理建议 |
 |---|------|------|----------|
-| 1 | **打包版无感获取 Cookie 不可用** | 打包版（mac/win）未捆绑 Chromium（360MB），"获取 Cookie"仅支持手动粘贴；无感捕获只在开发模式 | 后续支持"首次使用时按需下载浏览器组件"可补齐 |
+| 1 | ~~打包版无感获取 Cookie 不可用~~ | 已规划修复：**v0.1.1 捆绑 Chromium 进发布包**（roadmap P5），打包版恢复与开发模式一致的无感捕获 | roadmap P5（v0.1.1） |
 | 2 | **Windows 包未在真实 Windows 机器验收** | CI 构建成功 ≠ 功能验证（GUI/下载/WebView2） | 在 Win10/11 解压按 `manual-test-plan.md` §1/§5 冒烟 |
 | 3 | **未签名/未公证** | macOS 首次需"右键 → 打开"；正式分发需 Developer ID + notarization | 如对外分发再处理（需开发者证书） |
 | 4 | **WebView2 依赖**（Windows） | Win11/新版 Win10 自带；老系统需预装 | 发布说明中提示；如需静默安装再扩展 |
@@ -56,6 +56,8 @@
 ---
 
 ## 三、可扩展事项（按优先级建议）
+
+> 后续计划以此处与 `docs/roadmap.md` §2 为准（roadmap 为权威版本）。
 
 ### 高优先（补齐体验）
 1. **打包版无感获取 Cookie**：首次点击"获取 Cookie"时按需下载 Chromium 到数据目录（体积不随包分发）；
