@@ -7,6 +7,14 @@
 
 ## 〇、v0.1.1 交付（P1–P5 已完成，P6 发布完成/真机验收待执行）
 
+### 2026-09-05 发布期修复与安全清理
+
+| 事项 | 处理 |
+|------|------|
+| Windows 打包版启动崩溃 | windowed 模式 `sys.stdout/stderr=None` → uvicorn 日志配置 `isatty()` 崩溃：`launcher._ensure_stdio()` 替换哑对象（+2 单测）；**v0.1.1 tag 已重发修复版（74f807a 重写后 f416c91）；mac 不受影响** |
+| git 个人信息清理 | 历史曾跟踪 `output/` 下 23 个 mp3 成品（~130MB，已推公开仓库）：`git rm --cached` 停止跟踪 + **filter-repo 重写历史彻底移除**（main/v0.1.0/v0.1.1 已 force push，新 clone 历史 0 个 output 对象）；无真实 Cookie/token 泄露（测试中 SESSDATA 均为假值，`sudoPsw.txt` 未跟踪） |
+| 打包夹带核查 | 静态确认包内无 Cookie/数据：spec datas 仅 `frontend/dist`+`ffmpeg`；workflow 仅拷 `ms-playwright/chromium-*` 缓存；cookie/settings/tasks 位于运行数据目录（打包版平台用户目录），CI runner 无本地数据 |
+
 | 项 | 状态 | 说明 |
 |----|------|------|
 | P1 许可与免责 | ✅ | MIT LICENSE + README/Release notes/应用内"关于"三处免责 |
