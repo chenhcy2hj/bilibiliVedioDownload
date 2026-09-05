@@ -106,4 +106,4 @@ jobs:
             - `BiliDownloader-macOS-arm64.zip`（macOS 解压即用，未签名首次需右键 → 打开）
             - `BiliDownloader-Windows-x64.zip`（Windows 解压后运行 BiliDownloader.exe）
 
-            > 仅供个人学习使用，遵守平台规则，请勿商用。
+            > ⚠️ 仅供个人学习使用：风控与合规责任由使用者自行承担；请遵循平台规则，勿下载传播受版权保护的内容。

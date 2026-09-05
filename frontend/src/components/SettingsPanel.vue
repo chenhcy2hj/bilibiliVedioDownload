@@ -62,6 +62,7 @@ async function save() {
     <p class="about">
       BiliDownloader v{{ store.version.version }} · yt-dlp {{ store.version.ytdlp_version }}
     </p>
+    <p class="about warn">⚠️ 仅供个人学习使用，风控与合规责任由使用者自行承担</p>
   </section>
 </template>
 
@@ -132,5 +133,8 @@ input {
   margin: 10px 0 0;
   font-size: 11px;
   color: #94a3b8;
+}
+.about.warn {
+  color: #b45309;
 }
 </style>

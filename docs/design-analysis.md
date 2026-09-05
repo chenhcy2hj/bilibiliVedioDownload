@@ -221,7 +221,7 @@ class SettingsService:
    | 标准链接（无尾斜杠） | `https://www.bilibili.com/video/BV1Z8h36gEnp` |
    | 裸 BV 号（无域名） | `BV1JRuA6vEvd` |
 
-3. 确认项目仅**个人学习/自用**（README 已加入个人使用声明），遵守平台条款，控制并发与频率。
+3. 项目定位：**公开可用、不对使用者负责**（README 个人使用声明 + 仓库根 `LICENSE`（MIT））；批量基线：**单次 ≤10 条**（`MAX_URLS_PER_BATCH`，roadmap P2）；遵守平台条款，控制并发与频率。
 
 ### 3.3 参考资料
 - yt-dlp API：`progress_hooks`、`postprocessor_hooks`、`cookiefile`
@@ -253,6 +253,7 @@ class SettingsService:
 | 9 | 旧 CLI 兼容 | **抽公共核心，CLI 与 Web 共用下载服务** |
 | 10 | 桌面打包方案 | ✅ **D. pywebview 独立窗口**（系统 WebView 内嵌前端 + 同进程 FastAPI；macOS 用自带 WKWebView、Windows 依赖 WebView2）；**不设浏览器降级**，启动失败即报错退出；**双平台均由远端矩阵 workflow 构建**（推送 v* 标签即自动发布） |
 | 12 | 发布自动化 | ✅ 推送 `v*` 标签 → 双平台并行远端构建 → 自动创建/更新 Release + 上传 zip（`release.yml`，permissions: contents:write） |
+| 13 | 许可与定位 | ✅ **MIT License + 公开可用不对使用者负责**（README / 应用内"关于" / Release notes 三处免责提示） |
 | 11 | 下载目录 | ✅ **可配置**：`SettingsService` + `GET/PUT /api/settings`；pywebview 用原生目录选择器、浏览器模式手动输入；持久化到 settings.json，新任务生效 |
 
 ---
