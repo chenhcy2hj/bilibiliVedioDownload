@@ -46,6 +46,17 @@
 - 统一错误结构：API 错误响应 `{"code": <业务码>, "message": <原因>, "data": null}`；
 - 提交前跑通 `pytest` 与 `ruff`（或等价 lint）。
 
+**任务历史持久化规范（v0.1.1 P3，跨版本常态）**
+- 状态变更**必须**走 `TaskManager._set_status()` 统一入口（status 实际变化才触发写盘；进度事件走 `_set()` 不写盘）；
+- 写盘 = 全量快照 → `HistoryStore.save()`：tmp 文件 + `os.replace` 原子写、`threading.Lock` 并发保护、按 `created_at` 裁剪 `MAX_HISTORY=500`；
+- `tasks.json` 只存终态字段（id/input_url/source/kind/entry_count/title/status/error_*/file_path/created_at/finished_at），瞬时量（进度/速度）禁止落盘；
+- 新增任务字段/状态时：同步 `persist.TaskRecord` 与 `HistoryStore._valid` 校验；恢复任务需可经 `to_response` 直出（避免依赖运行期 request）。
+
+**发布包捆绑规范（v0.1.1 P5，跨版本常态）**
+- 捆绑目标目录约定（`Packaging/bilidownloader.spec` datas 目标）：`_browsers/`（Playwright Chromium，只捆有头版 `chromium-<数字>*`）、`ffmpeg/`、`frontend/dist`；
+- 运行时定位：res === 打包模式 → 由 `launcher.py` 在 import app.main 之前通过环境变量/常量注入（如 `PLAYWRIGHT_BROWSERS_PATH=_MEIPASS/_browsers`）；开发模式走系统级缓存/路径；
+- 新增捆绑资源四件套：workflow 安装步骤 + spec datas + 运行时注入 + 缺失时的明确兜底错误（`BrowserUnavailable` 类，禁止静默崩溃）。
+
 **前端（Vue3 + three.js）**
 - Composition API（`<script setup>`）；
 - 目录规范（frontend/src/）：

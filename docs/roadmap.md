@@ -21,51 +21,51 @@
 
 > 目标：本版本只做以下 5 项，其余一律不掺入。
 
-### P1 · 开源许可与免责声明
-- [ ] 仓库根新增 `LICENSE`（MIT，作者 chenhcy2hj）
-- [ ] README 个人使用声明升级："使用者自行承担风控与合规责任"措辞 + **MIT 许可段落**
-- [ ] `docs/design-analysis.md` §3.2 / 决策表同步定位
-- [ ] Release notes 模板（`release.yml` body）加入免责行
-- [ ] 前端设置面板"关于"区加一行："仅供个人学习，风控与合规责任由使用者承担"
+### P1 · 开源许可与免责声明 ✅
+- [x] 仓库根新增 `LICENSE`（MIT，作者 chenhcy2hj）
+- [x] README 个人使用声明升级："使用者自行承担风控与合规责任"措辞 + **MIT 许可段落**
+- [x] `docs/design-analysis.md` §3.2 / 决策表同步定位
+- [x] Release notes 模板（`release.yml` body）加入免责行
+- [x] 前端设置面板"关于"区加一行："仅供个人学习，风控与合规责任由使用者承担"
 
-**验收**：仓库含 LICENSE；三处免责提示可见；`gh release view` 模板含免责。
+**验收**：✅ 仓库含 LICENSE；三处免责提示可见；`gh release view` 模板含免责（commit 6fc80ed）。
 
-### P2 · 批量上限（≤10）
-- [ ] 后端：`MAX_URLS_PER_BATCH = 10` 常量；`POST /api/tasks` 超出返回 `422 + BATCH_TOO_LARGE` 业务码
-- [ ] 前端 UrlForm：行内提示"最多 10 条"；超出后禁用提交并提示
-- [ ] 测试：后端超限 422；前端逻辑随构建验证
+### P2 · 批量上限（≤10） ✅
+- [x] 后端：`MAX_URLS_PER_BATCH = 10` 常量；`POST /api/tasks` 超出返回 `422 + BATCH_TOO_LARGE` 业务码
+- [x] 前端 UrlForm：行内提示"最多 10 条"；超出后禁用提交并提示
+- [x] 测试：后端超限 422；前端逻辑随构建验证
 
-**验收**：粘贴 11 条 → 前端提示且后端拒绝；≤10 正常。
+**验收**：✅ 粘贴 11 条 → 前端提示且后端拒绝；≤10 正常（测试 3 条：10 放行 / 含空行放行 / 11 拒绝）。
 
-### P3 · 任务历史 JSON 持久化
-- [ ] `data/tasks.json`：终态（done/failed/canceled）写盘；**保留最近 500 条自动裁剪**；写盘带锁（防 worker 线程与 API 并发冲突）
-- [ ] 启动时恢复：终态任务进历史分组；**进行中任务标记"中断"（interrupted，灰色徽标）归入历史**
-- [ ] TaskManager 生命周期接入：`enqueue/终态` 更新持久化；提供 `clear_history()`（可选清空按钮）
-- [ ] 前端：TaskPanel 增加"中断"徽标样式（灰）；历史分组含 interrupted
-- [ ] 测试：持久化恢复、500 裁剪、中断标记
+### P3 · 任务历史 JSON 持久化 ✅
+- [x] `data/tasks.json`：终态（done/failed/canceled）写盘；**保留最近 500 条自动裁剪**；写盘带锁（防 worker 线程与 API 并发冲突）
+- [x] 启动时恢复：终态任务进历史分组；**进行中任务标记"中断"（interrupted，灰色徽标）归入历史**
+- [x] TaskManager 生命周期接入：`enqueue/终态` 更新持久化；`clear_history()` 未做（见 §2 候选）
+- [x] 前端：TaskPanel 增加"中断"徽标样式（灰）；历史分组含 interrupted
+- [x] 测试：持久化恢复、500 裁剪、中断标记
 
-**验收**：完成一个失败/成功任务 → 重启后端 → 历史分组恢复且含失败原因；6 首后 tasks.json 超 500 自动截断。
+**验收**：✅ 终态写盘/恢复/中断标记/裁剪/损坏容错/finished_at 透传（test_persist.py 8 条）。
 
-### P4 · 历史重试按钮
-- [ ] 历史行（failed / interrupted / canceled）增加"重试"按钮：复用 `POST /api/tasks`（同一 URL 重新入队，URL 取自 `input_url`）
-- [ ] 测试：重试入队成功、不产生重复持久化记录
+### P4 · 历史重试按钮 ✅
+- [x] 历史行（failed / interrupted / canceled）增加"重试"按钮：复用 `POST /api/tasks`（同一 URL 重新入队，URL 取自 `input_url`）
+- [x] 测试：重试入队成功、不产生重复持久化记录（同 URL 重复 create → 新任务并存）
 
-**验收**：失败任务点"重试"→ 新任务入队执行。
+**验收**：✅ 失败任务点"重试"→ 新任务入队执行；done 行提供"下载"链接。
 
-### P5 · 打包版恢复无感获取 Cookie（捆绑 Chromium）
-- [ ] `release.yml` 矩阵构建：`pip install playwright` + `playwright install chromium`（每平台调取对应版本）
-- [ ] `packaging/bilidownloader.spec`：datas 捆绑 chromium 目录（`chromium-<v>/`，mac arm64 / win x64 各自）；排除项移除对 playwright 的排除
-- [ ] 运行时定位：launcher/main 设置 `PLAYWRIGHT_BROWSERS_PATH` 指向包内浏览器目录（`sys._MEIPASS/_browsers`）
-- [ ] `api/cookie.py` guide：**移除"打包版仅支持手动粘贴"分支**，与开发模式一致（无感获取文案 + 书签/粘贴兜底）
-- [ ] 体积与构建时间确认：zip ~180-200MB、CI +1~2 分钟
-- [ ] 测试：打包版（本地 mac 验收）acquire 弹出窗口；`is_packaged` 分支单测更新
+### P5 · 打包版恢复无感获取 Cookie（捆绑 Chromium） ✅
+- [x] `release.yml` 矩阵构建：`pip install playwright` + `playwright install chromium`（每平台调取对应版本）
+- [x] `packaging/bilidownloader.spec`：datas 捆绑 chromium 目录（`chromium-<v>/`，mac arm64 / win x64 各自）；排除项移除对 playwright 的排除
+- [x] 运行时定位：launcher/main 设置 `PLAYWRIGHT_BROWSERS_PATH` 指向包内浏览器目录（`sys._MEIPASS/_browsers`）
+- [x] `api/cookie.py` guide：**移除"打包版仅支持手动粘贴"分支**，与开发模式一致（无感获取文案 + 书签/粘贴兜底）
+- [ ] 体积与构建时间确认：zip ~180-200MB、CI +1~2 分钟（P6 远端产物核验）
+- [ ] 测试：打包版（本地 mac 验收）acquire 弹出窗口（P6 真机验收）；`is_packaged` 分支单测 ✅ 已加
 
-**验收**：远端构建产物内含有头 Chromium；打包版点"获取 Cookie"弹窗登录自动捕获；guide 返回无感文案。
+**验收**：⏳ 远端构建产物内含有头 Chromium；打包版点"获取 Cookie"弹窗登录自动捕获；guide 返回无感文案（单测已过，真机待 P6）。
 
-### P6 · 发布与回归
-- [ ] 全量回归：存量 83 测试 + 新增用例全绿；ruff 通过
+### P6 · 发布与回归 🔵
+- [x] 全量回归：存量 83 测试 + 新增用例全绿（96 passed）；ruff 通过
 - [ ] 推送 `v0.1.1` 标签 → 双平台自动构建 + 自动发布（Release 资产含 Chromium）
-- [ ] 更新 `docs/project-status.md`（v0.1.1 移交到"已完成"）
+- [x] 更新 `docs/project-status.md`（v0.1.1 移交"已完成/待发布"）
 - [ ] 真实设备验收（mac：右键打开 → 无感 Cookie → 下载；Windows：虚拟/实体机同流程）
 
 **验收**：Release v0.1.1 双平台资产就绪；`manual-test-plan.md` §4/§5 在新产物上通过。

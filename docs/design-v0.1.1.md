@@ -1,7 +1,17 @@
 # v0.1.1 技术方案设计（P2–P6）
 
 > 前置：需求共识见 `docs/roadmap.md` §1；本文件为 P2–P6 的实现级设计（数据结构、接口、流程、边界）。
-> 状态：设计定稿、待实施。实施中如发现与现实冲突，先更新本文件再改代码。
+> 状态：**已实施**（P2–P5 代码完成并合入 main；P6 发布回归进行中）。实施偏差见文末「实施记录」。
+
+---
+
+## 实施记录（2026-08-28，代码合入后回填）
+
+- **P2**：按设计落地（`MAX_URLS_PER_BATCH=10`、422 `BATCH_TOO_LARGE`、前端 `MAX_ROWS=10` 禁用+提示）。
+- **P3**：按设计落地。实现细节：`_fail`/done/canceled 分支先落字段再 `_set_status` 切状态，保证写盘快照字段完整；`created_at/finished_at` 采用 UTC aware（`datetime.now(timezone.utc)`，与示例 `+00:00` 一致）；恢复任务用占位 `ParsedRequest`（entries 数 = entry_count）支持 `to_response` 直出；`enqueue` 也触发写盘（pending 任务重启后归入 interrupted）。新增 `backend/app/core/task/persist.py`、`backend/tests/test_persist.py`（8 条）。
+- **P4**：按设计落地（后端零改动复用 POST /api/tasks）；补充：done 历史行渲染「下载」链接（设计边界提到"有下载按钮"）。
+- **P5**：按设计落地（workflow `playwright install chromium`、spec glob `chromium-[0-9]*` 排除 headless shell、launcher 在 import app.main 前 `setdefault PLAYWRIGHT_BROWSERS_PATH`、guide 打包版回正）。体积/构建时间与真机无感获取验收待 P6 远端产物核验。
+- **P6**：回归全绿（96 passed + ruff + 前端 build）；推 tag 与真机验收待执行。
 
 ---
 
