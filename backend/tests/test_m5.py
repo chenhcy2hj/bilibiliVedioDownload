@@ -123,6 +123,38 @@ class TestCookieGuide:
         assert body["steps"]
 
 
+class TestLauncherStdio:
+    """windowed 模式（console=False）下 sys.stdout/stderr 为 None：
+    launcher._ensure_stdio 必须替换为哑对象，否则 uvicorn 日志配置崩溃（Windows 真机实测）。"""
+
+    def test_replaces_none_stdio(self, monkeypatch):
+        import sys as sys_mod
+
+        from app.launcher import _ensure_stdio
+
+        monkeypatch.setattr(sys_mod, "stdout", None)
+        monkeypatch.setattr(sys_mod, "stderr", None)
+        _ensure_stdio()
+        assert sys_mod.stdout is not None
+        assert sys_mod.stderr is not None
+        assert sys_mod.stdout.isatty() is False  # 关键：uvicorn Formatter 访问点
+        assert sys_mod.stdout.write("x") == 1  # 可写不抛
+        sys_mod.stdout.flush()
+
+    def test_normal_stdio_untouched(self, monkeypatch):
+        import io
+        import sys as sys_mod
+
+        from app.launcher import _ensure_stdio
+
+        fake_out = io.StringIO()
+        fake_err = io.StringIO()
+        monkeypatch.setattr(sys_mod, "stdout", fake_out)
+        monkeypatch.setattr(sys_mod, "stderr", fake_err)
+        _ensure_stdio()
+        assert sys_mod.stdout is fake_out  # 正常模式不做替换
+
+
 class TestChineseFilenameHeader:
     def test_file_response_content_disposition(self, tmp_path):
         from fastapi.testclient import TestClient

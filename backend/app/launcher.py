@@ -8,6 +8,8 @@
 
 开发模式：不要通过本文件启动（直接 uvicorn app.main:app），此时无 token 校验。
 """
+import io
+import logging
 import os
 import secrets
 import sys
@@ -18,6 +20,31 @@ from pathlib import Path
 import uvicorn
 
 from app.config import DATA_DIR, is_packaged
+
+
+def _ensure_stdio() -> None:
+    """windowed 模式（PyInstaller console=False）下 sys.stdout/stderr 为 None：
+    uvicorn 日志配置访问 isatty() 直接崩溃（Windows 真机实测 ValueError）。
+    替换为哑对象（isatty=False），打印/日志静默丢弃。
+    """
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+
+    class _NullWriter(io.TextIOBase):
+        def isatty(self) -> bool:
+            return False
+
+        def write(self, s: str) -> int:
+            return len(s)
+
+        def flush(self) -> None:
+            pass
+
+    if sys.stdout is None:
+        sys.stdout = _NullWriter()
+    if sys.stderr is None:
+        sys.stderr = _NullWriter()
+    logging.getLogger(__name__).debug("stdio 已替换为哑对象（windowed 模式）")
 
 
 def _fatal(message: str) -> None:
@@ -38,6 +65,9 @@ def _fatal(message: str) -> None:
 
 
 def main() -> None:
+    # windowed 模式 stdio 为 None：必须在任何日志/uvicorn 初始化之前替换（Windows 实测崩溃点）
+    _ensure_stdio()
+
     # P5：打包版浏览器指向包内捆绑目录（sys._MEIPASS/_browsers），恢复无感获取；
     # 必须在 import app.main（browser 惰性 import）之前设置；开发模式走系统缓存不设置。
     if is_packaged():
