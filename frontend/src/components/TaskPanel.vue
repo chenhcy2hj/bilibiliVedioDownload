@@ -1,7 +1,7 @@
 <script setup>
 // 任务面板：名称 + 条形码动态进度条 + 百分比（100% 绿色）
 // 注意：active/history 必须是 computed（响应式），否则任务行不会随 store 更新出现
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { api } from '../api'
 import { store } from '../store'
@@ -51,6 +51,21 @@ function fmtSpeed(v) {
 async function cancel(t) {
   try {
     await api.cancelTask(t.id)
+  } catch (e) {
+    alert(e.message)
+  }
+}
+
+// 历史重试（P4）：失败/中断/已取消可一键重试——同一 URL 重新入队（新任务）
+const RETRYABLE = new Set(['failed', 'interrupted', 'canceled'])
+const retryingId = ref('')
+async function retry(t) {
+  try {
+    await api.createTasks([t.input_url])
+    retryingId.value = t.id
+    setTimeout(() => {
+      retryingId.value = ''
+    }, 1500)
   } catch (e) {
     alert(e.message)
   }
@@ -106,6 +121,16 @@ const history = computed(() => store.tasks.filter((t) => !ACTIVE_STATUSES.includ
           <div class="top">
             <span class="badge" :class="t.status">{{ STATUS_LABEL[t.status] }}</span>
             <span class="name" :title="name(t)">{{ name(t) }}</span>
+            <!-- done 行可直接下载成品；失败/中断/已取消行一键重试（P4：同一 URL 重新入队） -->
+            <a v-if="t.status === 'done' && t.file_path" class="mini" :href="api.taskFileUrl(t.id)" target="_blank">下载</a>
+            <button
+              v-if="RETRYABLE.has(t.status)"
+              class="mini"
+              :disabled="retryingId === t.id"
+              @click="retry(t)"
+            >
+              {{ retryingId === t.id ? '已重试' : '重试' }}
+            </button>
           </div>
           <div class="barline">
             <div class="barcode">

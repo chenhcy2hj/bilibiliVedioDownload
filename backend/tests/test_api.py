@@ -58,6 +58,18 @@ class TestTasksAPI:
         assert body["code"] == "BATCH_TOO_LARGE"
         assert body["message"]
 
+    def test_retry_same_url_creates_second_task(self):
+        """P4 重试：同一 URL 重复提交 → 201 且两个任务并存（不覆盖历史记录）。"""
+        r1 = client.post("/api/tasks", json={"urls": ["BV1JRuA6vEvd"]})
+        r2 = client.post("/api/tasks", json={"urls": ["BV1JRuA6vEvd"]})
+        assert r1.status_code == 201
+        assert r2.status_code == 201
+        ids = [r.json()[0]["id"] for r in (r1, r2)]
+        assert ids[0] != ids[1]
+        all_tasks = client.get("/api/tasks").json()
+        matched = [t for t in all_tasks if t["id"] in ids]
+        assert len(matched) == 2
+
     def test_list_tasks(self):
         client.post("/api/tasks", json={"urls": ["BV1JRuA6vEvd"]})
         r = client.get("/api/tasks")
