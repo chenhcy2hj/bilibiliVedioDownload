@@ -13,10 +13,11 @@ import secrets
 import sys
 import threading
 import time
+from pathlib import Path
 
 import uvicorn
 
-from app.config import DATA_DIR
+from app.config import DATA_DIR, is_packaged
 
 
 def _fatal(message: str) -> None:
@@ -37,6 +38,12 @@ def _fatal(message: str) -> None:
 
 
 def main() -> None:
+    # P5：打包版浏览器指向包内捆绑目录（sys._MEIPASS/_browsers），恢复无感获取；
+    # 必须在 import app.main（browser 惰性 import）之前设置；开发模式走系统缓存不设置。
+    if is_packaged():
+        base = Path(getattr(sys, "_MEIPASS", Path(sys.argv[0]).resolve().parent))
+        os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", str(base / "_browsers"))
+
     # 调试/验证可用环境变量指定 token（正式运行随机生成）
     token = os.environ.get("BILIDL_LAUNCHER_TOKEN") or secrets.token_hex(16)
 

@@ -47,6 +47,11 @@ jobs:
       - name: 安装 Python 依赖
         run: pip install -r requirements.txt pyinstaller
 
+      - name: 安装 Playwright Chromium（P5：捆绑进发布包，打包版恢复无感获取）
+        # 有头 Chromium 缓存：macOS ~/Library/Caches/ms-playwright；Windows %LOCALAPPDATA%\ms-playwright
+        # 体积 ~160MB，构建时长 +1~2 分钟（接受）
+        run: python -m playwright install chromium
+
       - name: 获取静态 FFmpeg（npm 包内置二进制，绕开 GitHub 直连下载不稳定）
         shell: bash
         run: |

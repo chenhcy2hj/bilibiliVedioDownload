@@ -116,6 +116,20 @@ class TestCookieAPI:
         assert r.status_code == 200
         assert "bilibili.com" in r.json()["jump_url"]
 
+    def test_guide_packaged_branch(self, monkeypatch):
+        """P5：打包版 guide 回正——内置浏览器无感文案 + 书签/粘贴兜底（bookmarklet=None）。"""
+        import app.api.cookie as cookie_api
+
+        monkeypatch.setattr(cookie_api, "is_packaged", lambda: True)
+        r = client.get("/api/cookie/guide")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["bookmarklet"] is None
+        steps = " ".join(body["steps"])
+        assert "内置浏览器" in steps  # 无感获取文案（P5 回正）
+        assert "粘贴" in steps  # 手动粘贴仍为兜底
+        assert "请使用手动粘贴方式" not in steps  # 旧"仅手动"语义已移除
+
 
 class TestHealth:
     def test_health(self):

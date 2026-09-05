@@ -64,13 +64,16 @@ def cookie_guide():
                 "书签不可用时可手动粘贴：F12 → Network 任意请求头中的 Cookie → 粘贴到下方输入框",
             ],
         )
+    # 打包版（P5）：已捆绑有头 Chromium，与开发模式一致的无感获取；
+    # 动态端口使书签回传不适用（bookmarklet=None），书签/粘贴仍为兜底。
     return CookieGuideResponse(
         jump_url="https://www.bilibili.com/",
         bookmarklet=None,
         steps=[
-            "打包版使用动态端口，书签回传不适用；请使用手动粘贴方式",
-            "点击下方按钮打开 bilibili.com 并登录",
-            "F12 → Network 任意请求头中复制 Cookie → 粘贴到下方输入框提交",
+            "点击下方「获取 Cookie」按钮，弹出内置浏览器窗口打开 bilibili.com",
+            "在窗口内完成登录（登录态会持久化，下次可复用）",
+            "登录成功后自动捕获并保存 Cookie，无需复制粘贴",
+            "内置浏览器不可用时兜底：F12 → Network 任意请求头复制 Cookie → 粘贴到下方输入框",
         ],
     )
 
