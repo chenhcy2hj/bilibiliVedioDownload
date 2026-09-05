@@ -1,17 +1,17 @@
-# 项目状态总览（v0.1.0 / v0.1.1 已发布待验收）
+# 项目状态总览（v0.1.0 / v0.1.1 ✅ 双平台验收完成）
 
-> 更新日期：2026-09-05（v0.1.1 双平台 Release 已发布；P1–P5 详见 `docs/roadmap.md` §1）。
+> 更新日期：2026-09-05（v0.1.1 双平台真机验收通过，v0.1.1 全量完成；P1–P5 详见 `docs/roadmap.md` §1）。
 > 详细设计见 `design-analysis.md`，开发规范见 `development-guide.md`，测试方案见 `manual-test-plan.md`。
 
 ---
 
-## 〇、v0.1.1 交付（P1–P5 已完成，P6 发布完成/真机验收待执行）
+## 〇、v0.1.1 交付（✅ 全部完成，2026-09-05 双平台验收通过）
 
 ### 2026-09-05 发布期修复与安全清理
 
 | 事项 | 处理 |
 |------|------|
-| Windows 打包版启动崩溃 | windowed 模式 `sys.stdout/stderr=None` → uvicorn 日志配置 `isatty()` 崩溃：`launcher._ensure_stdio()` 替换哑对象（+2 单测）；**v0.1.1 tag 已重发修复版（74f807a 重写后 f416c91）；mac 不受影响** |
+| Windows 打包版启动崩溃 | windowed 模式 `sys.stdout/stderr=None` → uvicorn 日志配置 `isatty()` 崩溃：`launcher._ensure_stdio()` 替换哑对象（+2 单测）；**v0.1.1 tag 已重发修复版（74f807a 重写后 f416c91）；mac 不受影响；修复版 Windows 真机启动/下载 ✅** |
 | git 个人信息清理 | 历史曾跟踪 `output/` 下 23 个 mp3 成品（~130MB，已推公开仓库）：`git rm --cached` 停止跟踪 + **filter-repo 重写历史彻底移除**（main/v0.1.0/v0.1.1 已 force push，新 clone 历史 0 个 output 对象）；无真实 Cookie/token 泄露（测试中 SESSDATA 均为假值，`sudoPsw.txt` 未跟踪） |
 | 打包夹带核查 | 静态确认包内无 Cookie/数据：spec datas 仅 `frontend/dist`+`ffmpeg`；workflow 仅拷 `ms-playwright/chromium-*` 缓存；cookie/settings/tasks 位于运行数据目录（打包版平台用户目录），CI runner 无本地数据 |
 
@@ -22,7 +22,7 @@
 | P3 任务历史持久化 | ✅ | `data/tasks.json`（原子写 + 锁 + 500 裁剪）；状态机驱动写盘（进度不写）；启动恢复：终态进历史、进行中 → `interrupted`（灰徽标）；`finished_at` 透传 |
 | P4 历史重试 | ✅ | 历史行（failed/interrupted/canceled）一键重试（复用 POST /api/tasks）；done 行"下载"链接 |
 | P5 Chromium 捆绑 | ✅ | workflow 安装 + spec 捆绑（排除 headless shell）+ launcher 注入 `PLAYWRIGHT_BROWSERS_PATH`；guide 打包版文案回正（无感获取 + 粘贴兜底） |
-| P6 发布回归 | 🔵 | 代码回归全绿（96 passed + ruff + 前端 build）；**v0.1.1 Release 已发布**（mac 248MB / win 276MB，含 Chromium）；真机验收待执行 |
+| P6 发布回归 | ✅ | 代码回归全绿（98 passed + ruff + 前端 build）；**v0.1.1 Release 双平台资产含 Chromium**（mac 248MB / win 276MB）；**真机验收通过**（mac 全链路；Windows 修复版启动+下载） |
 
 ---
 

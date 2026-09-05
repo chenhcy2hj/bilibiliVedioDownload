@@ -1,7 +1,8 @@
-# 后续计划 · Roadmap（v0.1.1 → v0.2.0）
+# 后续计划 · Roadmap（v0.1.1 完成 → v0.2.0）
 
 > 来源：基于 `design-analysis.md` 的多轮设计拷问（2026-08-28）收敛共识。
 > 配套：`project-status.md`（已完成/未完成/可扩展）、`development-guide.md`（开发规范）、`manual-test-plan.md`（测试方案）。
+> **v0.1.1 已全量完成（2026-09-05）**；未勾选项见 §2 候选。
 
 ---
 
@@ -57,16 +58,18 @@
 - [x] `packaging/bilidownloader.spec`：playwright 库随包（excludes 移除）；**Chromium 由 release.yml 打包后直拷产物 `_browsers/`**（实施修正：spec datas 方案在 macOS 上触发 PyInstaller 重签 Chrome.app 失败，2026-09-05）
 - [x] 运行时定位：launcher/main 设置 `PLAYWRIGHT_BROWSERS_PATH` 指向包内浏览器目录（`sys._MEIPASS/_browsers`）
 - [x] `api/cookie.py` guide：**移除"打包版仅支持手动粘贴"分支**，与开发模式一致（无感获取文案 + 书签/粘贴兜底）
-- [ ] 体积与构建时间确认：zip ~180-200MB、CI +1~2 分钟（P6 远端产物核验）
-- [ ] 测试：打包版（本地 mac 验收）acquire 弹出窗口（P6 真机验收）；`is_packaged` 分支单测 ✅ 已加
+- [x] 体积与构建时间确认：zip ~180-200MB、CI +1~2 分钟（实测 mac 248MB / win 276MB，均含 Chromium）
+- [x] 测试：打包版（mac 真机）acquire 弹出窗口 ✅；`is_packaged` 分支单测 ✅
 
-**验收**：⏳ 远端构建产物内含有头 Chromium；打包版点"获取 Cookie"弹窗登录自动捕获；guide 返回无感文案（单测已过，真机待 P6）。
+**验收**：✅ 远端构建产物内含有头 Chromium；打包版点"获取 Cookie"弹窗登录自动捕获（mac/windows 真机）；guide 返回无感文案（单测 + 真机）。
 
-### P6 · 发布与回归 🔵（仅剩真机验收）
-- [x] 全量回归：存量 83 测试 + 新增用例全绿（96 passed）；ruff 通过
-- [x] 推送 `v0.1.1` 标签 → 双平台自动构建 + 自动发布（Release 资产含 Chromium：mac zip 248MB / win zip 276MB）
+### P6 · 发布与回归 ✅
+- [x] 全量回归：存量 83 测试 + 新增用例全绿（96 → 98 passed）；ruff 通过
+- [x] 推送 `v0.1.1` 标签 → 双平台自动构建 + 自动发布（Release 资产含 Chromium：mac zip 248MB / win zip 276MB；Windows 启动崩溃修复后重发修复版）
 - [x] 更新 `docs/project-status.md`（v0.1.1 移交"已完成/待验收"）
-- [ ] 真实设备验收（mac：右键打开 → 无感 Cookie → 下载；Windows：虚拟/实体机同流程）→ 回填 `manual-test-plan.md`
+- [x] 真实设备验收（mac：启动 → 无感 Cookie → 下载 ✅；Windows：stdio 修复版启动 → 下载链路 ✅，2026-09-05）
+
+**验收**：✅ Release v0.1.1 双平台资产就绪；`manual-test-plan.md` §4/§5 在新产物上通过；Windows 崩溃修复版经真机确认。
 
 **验收**：Release v0.1.1 双平台资产就绪；`manual-test-plan.md` §4/§5 在新产物上通过。
 
