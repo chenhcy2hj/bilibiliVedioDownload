@@ -77,3 +77,6 @@ REFERER = "https://www.bilibili.com"
 # 默认音频规格
 DEFAULT_AUDIO_FORMAT = "mp3"
 DEFAULT_AUDIO_QUALITY = "192"
+
+# 单次提交 URL 上限（v0.1.1 P2）
+MAX_URLS_PER_BATCH = 10

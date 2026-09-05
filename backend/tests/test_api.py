@@ -33,6 +33,31 @@ class TestTasksAPI:
         assert body["code"] == "UNSUPPORTED_URL"
         assert body["message"]
 
+    def test_create_task_batch_10_ok(self):
+        """恰好 10 条放行。"""
+        urls = ["BV1JRuA6vEv" + str(i) for i in range(10)]
+        r = client.post("/api/tasks", json={"urls": urls})
+        assert r.status_code == 201
+        assert len(r.json()) == 10
+
+    def test_create_task_batch_10_with_blank_lines_ok(self):
+        """10 条中含空行/纯空白行仍放行（空行不计入数量）。"""
+        urls = ["BV1JRuA6vEv" + str(i) for i in range(8)]
+        urls += ["", "   ", " "]
+        r = client.post("/api/tasks", json={"urls": urls})
+        assert r.status_code == 201
+        assert len(r.json()) == 8
+
+    def test_create_task_batch_too_large(self):
+        """11 条 → 422 BATCH_TOO_LARGE（含空白行干扰也不放行）。"""
+        urls = ["BV1JRuA6vEv" + str(i) for i in range(10)]
+        urls += ["", "BV1JRuA6vEvX", "  "]
+        r = client.post("/api/tasks", json={"urls": urls})
+        assert r.status_code == 422
+        body = r.json()
+        assert body["code"] == "BATCH_TOO_LARGE"
+        assert body["message"]
+
     def test_list_tasks(self):
         client.post("/api/tasks", json={"urls": ["BV1JRuA6vEvd"]})
         r = client.get("/api/tasks")

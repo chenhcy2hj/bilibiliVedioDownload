@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import FileResponse
 
 from app.api.errors import ApiError
+from app.config import MAX_URLS_PER_BATCH
 from app.core.task.manager import TaskManager
 from app.core.url.base import UnsupportedUrlError
 from app.core.url.registry import UrlParserRegistry
@@ -31,12 +32,17 @@ def create_tasks(
     registry: RegistryDep,
     tasks: TasksDep,
 ):
-    """提交 URL（可多个）：解析并入队；解析失败返回业务码，不返回 500。"""
+    """提交 URL（可多个，上限 10）：解析并入队；解析失败返回业务码，不返回 500。"""
+    # 先 strip + 去空行，统计有效行数（空行/纯空白不计入）
+    lines = [u.strip() for u in body.urls if u.strip()]
+    if len(lines) > MAX_URLS_PER_BATCH:
+        raise ApiError(
+            "BATCH_TOO_LARGE",
+            f"单次最多提交 {MAX_URLS_PER_BATCH} 条链接",
+            status_code=422,
+        )
     created: list[TaskResponse] = []
-    for url in body.urls:
-        url = url.strip()
-        if not url:
-            continue
+    for url in lines:
         try:
             request = registry.dispatch(url)
         except UnsupportedUrlError as e:

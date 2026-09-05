@@ -11,6 +11,9 @@ const DEFAULT_PATTERNS = [
   { key: 'short', label: '短链', re: /^https?:\/\/b23\.tv\/[0-9A-Za-z]+$/ },
 ]
 
+// 单次提交链接数上限（与后端 MAX_URLS_PER_BATCH 一致）
+const MAX_ROWS = 10
+
 const text = ref('')
 const format = ref({ audio_format: 'mp3', audio_quality: '192' })
 const submitting = ref(false)
@@ -33,6 +36,9 @@ const rows = computed(() =>
 )
 
 const validCount = computed(() => rows.value.filter((r) => r.ok).length)
+
+// 超出上限：不阻塞粘贴，仅拦截提交
+const overLimit = computed(() => rows.value.length > MAX_ROWS)
 
 async function submit() {
   error.value = ''
@@ -82,10 +88,11 @@ async function submit() {
           <option value="320">320k</option>
         </select>
       </label>
-      <button :disabled="submitting || !validCount" @click="submit">
+      <button :disabled="submitting || !validCount || overLimit" @click="submit">
         {{ submitting ? '创建中…' : `创建任务（${validCount}）` }}
       </button>
     </div>
+    <p v-if="overLimit" class="msg bad">最多 {{ MAX_ROWS }} 条（当前 {{ rows.length }}），请删减后提交</p>
     <p v-if="success" class="msg ok">{{ success }}</p>
     <p v-if="error" class="msg bad">{{ error }}</p>
   </section>
